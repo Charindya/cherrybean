@@ -1,0 +1,16 @@
+# Default values for corporate-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+container:
+  replicaCount: 1
+  imagePrefix: ""
+  imagePullPolicy: IfNotPresent
+  health:
+    preStopCommand:
+      - sleep
+      - 5
+resources:
+  limits:
+    memory: 24Mi
+  requests:
+    memory: 24Mi

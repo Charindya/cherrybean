@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "application.fullname" . }}
+  labels:
+    app: {{ template "application.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.container.replicaCount }}
+  minReadySeconds: {{ .Values.container.health.minReadySeconds }}
+  selector:
+    matchLabels:
+      app: {{ template "application.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "application.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.container.imagePrefix }}{{ template "application.name" . }}:{{ .Chart.Version }}
+          imagePullPolicy: {{ .Values.container.imagePullPolicy }}
+          command:
+            - "/go/bin/bot"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                {{- range $index, $stopcommand := .Values.container.health.preStopCommand }}
+                - {{ $stopcommand | quote }}
+                {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
